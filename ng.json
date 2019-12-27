@@ -1,0 +1,10 @@
+[
+    {
+        "Prefix": "bing",
+        "Forword": "http://www.bing.com"
+    },
+    {
+        "Prefix": "baidu",
+        "Forword": "http://www.baidu.com"
+    }
+]
