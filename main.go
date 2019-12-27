@@ -17,7 +17,7 @@ func main() {
 	log.Printf("Listen On http://localhost:%d", port)
 	log.Printf("Work Directory: %s", wd)
 	log.Printf("Root Directory: %s", rd)
-	http.HandleFunc("/upload", uploadHandler)
+	// http.HandleFunc("/upload", uploadHandler)
 
 	handles := getHandles("./ng.json")
 	for _, handle := range handles {
