@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+cd src
+if [ ! -f go.mod ]; then
+    go mod init fdsa.ltd/ng
+fi
+
+# OLDGOPATH="$GOPATH"
+# export GOPATH=`pwd`
+
+gofmt -w src
+set GOOS=linux
+set GOARCH=amd64
+go build -o ../bin/gn fdsa.ltd/ng 
+cd ..
+echo 'finished'
