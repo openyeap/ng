@@ -1,24 +1,28 @@
 @echo off
 setlocal
+
 if exist go.mod goto build
 go mod init fdsa.ltd/ng
 goto build
 
 :build
-set OLDGOPATH=%GOPATH%
-set GOPATH=%~dp0
+REM set OLDGOPATH=%GOPATH%
+REM set GOPATH=%~dp0
 
-gofmt -w ./
+REM gofmt -w src
 
-if "%1" == "1" (
-    set GOOS=linux
-    set GOARCH=amd64
-    go build -o ../bin/ng fdsa.ltd/ng 
-    goto end
-)
+set GOOS=linux
+set GOARCH=amd64
+go build -o bin/ng fdsa.ltd/ng/src
+
 set GOOS=windows
 set GOARCH=amd64
-go build -o ../bin/ng.exe fdsa.ltd/ng 
+go build -o bin/ng.exe fdsa.ltd/ng/src
+
+
 :end
-set GOPATH=%OLDGOPATH%
+REM set GOPATH=%OLDGOPATH%
+del go.mod
+del go.sum
+
 echo finished

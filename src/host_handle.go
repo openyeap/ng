@@ -11,7 +11,7 @@ import (
 )
 
 type Host struct {
-	Static string
+	Root   string
 	Port   string
 	Routes []Route
 }
@@ -165,5 +165,5 @@ func (this *Host) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	http.FileServer(http.Dir(this.Static)).ServeHTTP(w, r)
+	http.FileServer(http.Dir(this.Root)).ServeHTTP(w, r)
 }

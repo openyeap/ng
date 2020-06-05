@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-cd src
+
 if [ ! -f go.mod ]; then
     go mod init fdsa.ltd/ng
 fi
@@ -7,12 +7,15 @@ fi
 # OLDGOPATH="$GOPATH"
 # export GOPATH=`pwd`
 
-gofmt -w src
+# gofmt -w src
 set GOOS=linux
 set GOARCH=amd64
-go build -o ../bin/ng fdsa.ltd/ng 
+go build -o bin/ng fdsa.ltd/ng/src
 
+set GOOS=windows
+set GOARCH=amd64
+go build -o bin/ng.exe fdsa.ltd/ng/src
 
-
-cd ..
+rm -f go.mod
+rm -f go.sum
 echo 'finished'
