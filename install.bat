@@ -22,7 +22,7 @@ go build -o bin/ng.exe fdsa.ltd/ng/src
 
 :end
 REM set GOPATH=%OLDGOPATH%
-del go.mod
-del go.sum
+REM del go.mod
+REM del go.sum
 
 echo finished

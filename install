@@ -16,6 +16,6 @@ set GOOS=windows
 set GOARCH=amd64
 go build -o bin/ng.exe fdsa.ltd/ng/src
 
-rm -f go.mod
-rm -f go.sum
+# rm -f go.mod
+# rm -f go.sum
 echo 'finished'
