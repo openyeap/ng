@@ -10,6 +10,9 @@ fi
 gofmt -w src
 set GOOS=linux
 set GOARCH=amd64
-go build -o ../bin/gn fdsa.ltd/ng 
+go build -o ../bin/ng fdsa.ltd/ng 
+
+
+
 cd ..
 echo 'finished'
