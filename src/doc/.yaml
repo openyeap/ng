@@ -1,0 +1,6 @@
+name: test
+layout: ../../layout
+statics:
+- ./statics/**
+- ./images/**
+docs: ../../docs

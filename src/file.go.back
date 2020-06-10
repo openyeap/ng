@@ -1,0 +1,137 @@
+// package main
+
+// import (
+// 	"bufio"
+// 	"encoding/json"
+// 	"flag"
+// 	"fmt"
+// 	"gopkg.in/osteele/liquid.v1"
+	 
+// 	"gopkg.in/yaml.v2"
+// 	"io/ioutil"
+// 	"log"
+// 	"os"
+// 	"path/filepath"
+// 	"strings"
+// 	github.com/gomarkdown/markdown
+// )
+
+// type Page struct {
+// 	Name    string
+// 	Author  string
+// 	Weight  int32
+// 	Path    string
+// 	Content string
+// 	Data    map[string]interface{}
+// }
+
+// type NPage struct {
+// 	Content  Page
+// 	Children []Page
+// }
+
+// // readLines reads a whole file into memory
+// // and returns a slice of its lines.
+// func readLines(path string) ([]string, error) {
+// 	file, err := os.Open(path)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	defer file.Close()
+
+// 	var lines []string
+// 	scanner := bufio.NewScanner(file)
+// 	for scanner.Scan() {
+// 		lines = append(lines, scanner.Text())
+// 	}
+// 	return lines, scanner.Err()
+// }
+
+// // writeLines writes the lines to the given file.
+// func writeLines(lines []string, path string) error {
+// 	file, err := os.Create(path)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer file.Close()
+
+// 	w := bufio.NewWriter(file)
+// 	for _, line := range lines {
+// 		fmt.Fprintln(w, line)
+// 	}
+// 	return nil
+// }
+// func getFilelist(path string) {
+// 	err := filepath.Walk(path, func(path string, f os.FileInfo, err error) error {
+// 		if f == nil {
+// 			return err
+// 		}
+// 		if f.IsDir() {
+// 			println("=====================================")
+// 			p := Page{}
+// 			p.Name = f.Name()
+// 			p.Path = path
+// 			if data, err := json.Marshal(p); err == nil {
+// 				fmt.Printf("%s\n", data)
+// 			}
+// 			return nil
+// 		}
+// 		println(path)
+// 		content, err := readLines(path)
+// 		if err != nil {
+// 			//Do something
+// 		}
+// 		data := strings.Join(content, "\r\n")
+// 		html := string(markdown.Run([]byte(data)))
+// 		fmt.Println(html)
+
+// 		engine := liquid.NewEngine()
+
+// 		out, err := engine.ParseAndRenderString(html, siteMap)
+// 		if err != nil {
+// 			log.Fatalln(err)
+// 		}
+// 		fmt.Println(out)
+// 		return nil
+// 	})
+// 	if err != nil {
+// 		fmt.Printf("filepath.Walk() returned %v\n", err)
+// 	}
+// }
+// func getPage(filePath string) NPage {
+// 	p := NPage{}
+// 	p.Content = Page{}
+// 	fi, err := os.Stat(filePath)
+// 	if err != nil {
+// 		return p
+// 	}
+// 	data, err := ioutil.ReadFile(filePath)
+// 	if err != nil {
+// 		return p
+// 	}
+// 	content := string(data)
+
+// 	p.Content.Name = fi.Name()
+// 	p.Content.Path = filePath
+// 	p.Content.Content = content
+// 	dict := make(map[string]interface{})
+// 	err = yaml.Unmarshal([]byte(data), &dict)
+// 	if err != nil {
+// 		return p
+// 	}
+// 	p.Content.Data = dict
+// 	return p
+// }
+// func main2() {
+// 	flag.Parse()
+// 	root := "."
+// 	// get config from root
+// 	site := getPage(root + "/" + "config.yaml")
+// 	fmt.Printf("%v\n", site)
+
+// 	site.Children = make([]Page, 0)
+// 	pages := getFilelist("./content", siteMap)
+// 	for _, v := range pages {
+// 		site.Children = append(site.Children, v)
+// 	}
+// }
