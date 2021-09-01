@@ -1,19 +1,26 @@
 package main
 
 import (
+	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
+
+	"github.com/fsnotify/fsnotify"
 )
 
 type Host struct {
-	Root   string
-	Port   string
-	Routes []Route
+	Root      string
+	Port      string
+	Templates []string
+	Routes    []Route
 }
 type Route struct {
 	Name    string
@@ -21,6 +28,15 @@ type Route struct {
 	Asserts []string
 	Filters []string
 }
+type Plugin struct {
+	Name string
+	Uri  string
+}
+
+var (
+	temp    *template.Template
+	plugins []Plugin
+)
 
 func assert(asserts []string, r *http.Request) bool {
 	// # time in from end
@@ -144,26 +160,118 @@ func Filter(filters []string, r *http.Request) {
 
 }
 
-func (this *Host) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+var lock = sync.RWMutex{}
 
-	for _, router := range this.Routes {
-		url, err := url.Parse(router.Uri)
-		if err != nil {
-			log.Println(err)
-			continue
+func (my *Host) init() {
+	lock.Lock()
+	if len(my.Templates) > 0 {
+		list := make([]string, len(my.Templates))
+		for key, value := range my.Templates {
+			list[key] = my.Root + "/" + value
 		}
+		temp, _ = template.ParseFiles(list...)
+		// plugins = []Plugin{{Name: "app4", Uri: "/purehtml/js/app.js"}}
+		plugins = getPlugins(my.Root + "/apps")
+		log.Println(plugins)
+	}
+	lock.Unlock()
+}
+func getPlugins(path string) []Plugin {
+	result := make([]Plugin, 0)
+	files, _ := ioutil.ReadDir(path)
+	for _, f := range files {
+		log.Printf("发现应用：%s\n", f.Name())
+		result = append(result, Plugin{Name: f.Name(), Uri: "/apps/" + f.Name() + "/dist/js/app.js"})
+	}
+	// err := filepath.Walk(path, func(path string, f os.FileInfo, err error) error {
+	// 	if f == nil {
+	// 		return err
+	// 	}
 
-		if assert(router.Asserts, r) {
-			Filter(router.Filters, r)
-			log.Println(router)
+	// 	if f.IsDir() {
+	// 		log.Println(path)
+	// 		log.Println(f.Name())
+	// 		result = append(result, Plugin{Name: f.Name(), Uri: "/" + f.Name() + "/dist/js/app.js"})
+	// 	}
+	// 	return nil
+	// })
+	// if err != nil {
+	// 	fmt.Printf("filepath.Walk() returned %v\n", err)
+	// }
+	return result
+}
+func (host *Host) watch() {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer watcher.Close()
+	done := make(chan bool)
+	go func() {
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				if !ok {
+					return
+				}
+				log.Println("event:", event)
+				if event.Op&fsnotify.Write == fsnotify.Write {
+					log.Println("modified file:", event.Name)
+					host.init()
+				}
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					return
+				}
+				log.Println("error:", err)
+			}
+		}
+	}()
+	err = watcher.Add(host.Root)
+	if err != nil {
+		log.Fatal(err)
+	}
+	<-done
+}
+func (my *Host) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if my.Routes != nil && len(my.Routes) > 0 {
+		for _, router := range my.Routes {
+			url, err := url.Parse(router.Uri)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
 
-			r.Host = url.Host
-
-			proxy := httputil.NewSingleHostReverseProxy(url)
-
-			proxy.ServeHTTP(w, r)
-			return
+			if assert(router.Asserts, r) {
+				Filter(router.Filters, r)
+				log.Println(router)
+				r.Host = url.Host
+				proxy := httputil.NewSingleHostReverseProxy(url)
+				proxy.ServeHTTP(w, r)
+				return
+			}
 		}
 	}
-	http.FileServer(http.Dir(this.Root)).ServeHTTP(w, r)
+	if temp != nil {
+		if r.URL.Path == "" || r.URL.Path == "/" {
+			temp.Execute(w, plugins)
+			return
+		}
+		// log.Printf("Root: %s Path: %s\n", "判断文件是否存在", r.URL.Path)
+		if _, err := os.Stat(my.Root + r.URL.Path); os.IsNotExist(err) {
+			// data, err := ioutil.ReadFile(this.Root + "/index.html")
+
+			// if err == nil {
+			// 	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(data)))
+			// 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			// 	w.Write(data)
+			// 	return
+			// }
+
+			temp.Execute(w, plugins)
+			return
+		}
+
+	}
+	http.FileServer(http.Dir(my.Root)).ServeHTTP(w, r)
 }

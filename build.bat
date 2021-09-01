@@ -4,37 +4,46 @@ setlocal
 FOR /F "delims=" %%i IN ("%cd%") DO (
     set name=%%~ni
 ) 
-if not "%1" == "" (
+
+if "%1" == "" (
     del go.mod
     del go.sum
+    go mod init fdsa.ltd/%name%
 )
-if exist go.mod goto build
-go mod init fdsa.ltd/%name%
-goto build
-
-:build
-REM set OLDGOPATH=%GOPATH%
-REM set GOPATH=%~dp0
 
 REM gofmt -w src
 set GOOS=linux
 set GOARCH=amd64
-go build -o ./bin/%name% fdsa.ltd/%name%/src
+
+if "%1" == "" (
+    go build -o ./bin/%name% fdsa.ltd/%name%/src
+) else (
+    go build -ldflags="-s -w" -o ./bin/%name% fdsa.ltd/%name%/src
+)
 echo go: linux version is finished ok
 
 set GOOS=windows
 set GOARCH=amd64
-go build -o ./bin/%name%.exe fdsa.ltd/%name%/src
+if "%1" == "" (
+    go build -o ./bin/%name%.exe fdsa.ltd/%name%/src
+) else (
+    go build -ldflags="-s -w" -o ./bin/%name%.exe fdsa.ltd/%name%/src
+)
 echo go: windows version is finished ok
 
 
-if "%1" == "upx" goto upx
-goto end
+@REM if "%1" == "" (
+@REM     echo go: package...
+@REM ) else (
+@REM     upx -9 ./bin/%name%.exe
+@REM     upx -9 ./bin/%name%
+@REM )
 
-:upx
-   start upx ./bin/%name%.exe
-   start upx ./bin/%name%
-   goto end
-:end
-    REM set GOPATH=%OLDGOPATH%
-    echo go: all is finished
+@REM if not exist target (
+@REM     mkdir target
+@REM )
+@REM cd ..
+
+@REM tar -czvf %name%/target/%name%.tar.gz %name%/install %name%/install.bat %name%/bin %name%/*.md %name%/docs
+@REM zip %name%/target/%name%.zip %name%/install %name%/install.bat %name%/bin %name%/*.md %name%/docs
+@REM echo go: all is finished
