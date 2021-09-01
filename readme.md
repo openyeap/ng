@@ -17,12 +17,8 @@ Golang支持交叉编译，也就是说你在32位平台的机器上开发，可
 
 交叉编译依赖下面几个环境变量：
 
-
-
 $GOARCH    目标平台（编译后的目标平台）的处理器架构（386、amd64、arm）
 $GOOS          目标平台（编译后的目标平台）的操作系统（darwin、freebsd、linux、windows）
-
-
 
 ```cmd
 # build for linux
@@ -34,7 +30,5 @@ go build app.go
 set GOOS=windows
 set GOARCH=amd64
 go build app.go
-
-
 ```
 
