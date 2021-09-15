@@ -1,24 +1,24 @@
 host:
-  root: ./
+  root: ./public
   port: 5555
   templates:
     - index.html
-  routes:
-    - name: bing
-      uri: https://cn.bing.com/
-      asserts:
-        - host localhost:5555
-        - path /bing
-      filters:
-        - path remove 1
-    - name: consul
-      uri: http://10.168.4.14:8500
-      asserts:
-        - host localhost:5555
-    - name: local
-      uri: http://10.168.4.14
-      asserts:
-        - host 127.0.0.1:5555
+  # routes:
+  #   - name: bing
+  #     uri: https://cn.bing.com/
+  #     asserts:
+  #       - host localhost:5555
+  #       - path /bing
+  #     filters:
+  #       - path remove 1
+  #   - name: consul
+  #     uri: http://10.168.4.14:8500
+  #     asserts:
+  #       - host localhost:5555
+  #   - name: local
+  #     uri: http://10.168.4.14
+  #     asserts:
+  #       - host 127.0.0.1:5555
   # - name: localhost
   #   location:
   #   - path: bing
