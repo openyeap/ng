@@ -29,3 +29,5 @@ obj/
 *.springBeans
 *.user
 .project
+go.mod
+go.sum
